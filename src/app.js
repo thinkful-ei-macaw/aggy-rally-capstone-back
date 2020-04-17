@@ -15,18 +15,23 @@ app.use(helmet());
 app.use(cors());
 
 // import routers
-const employeesRouter = require('./routers/employees-router');
+const usersRouter = require('./routers/users-router');
 const protectedRouter = require('./routers/protected-router');
+const authRouter = require('./routers/auth-router');
 
 // set up routes
 const routes = [
   {
-    url: '/employees',
-    router: employeesRouter,
+    url: '/users',
+    router: usersRouter,
   },
   {
     url: '/protected',
     router: protectedRouter,
+  },
+  {
+    url: '/auth',
+    router: authRouter,
   }
 ];
 
@@ -46,14 +51,14 @@ app.get('/', (req, res) => {
 
 // error handling
 // eslint-disable-next-line no-unused-vars
-const errorHandler = (error, req, res) => {
+const errorHandler = (error, req, res, next) => {
   let response;
   if (NODE_ENV === 'production') {
     response = { error: { message: 'Server error' } };
   } else {
     response = { message: error.message, error };
   }
-
+  console.log(error)
   return res
     .status(500)
     .json(response);

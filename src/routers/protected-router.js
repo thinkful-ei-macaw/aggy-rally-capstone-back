@@ -1,5 +1,5 @@
 const express = require('express');
-const auth = require('../middleware/auth');
+const { requireAuth: auth } = require('../middleware/jwt-auth');
 
 /**
  * Router to handle all requests to /protected

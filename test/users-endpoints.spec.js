@@ -2,13 +2,13 @@ const knex = require('knex');
 const app = require('../src/app');
 
 const { TEST_DATABASE_URL } = require('../src/config');
-const { makeEmployeesArray, randomEmployee } = require('./employees.fixtures');
+const { makeUsersArray, randomUser } = require('./users.fixtures');
 
 // set up variables used throughout these tests
-const table_name = 'employees';
-const endpoint = '/employees';
+const table_name = 'users';
+const endpoint = '/users';
 
-describe('Employees endpoints', () => {
+describe('Users endpoints', () => {
   let db;
   before('set up db instance', () => {
     db = knex({
@@ -19,29 +19,29 @@ describe('Employees endpoints', () => {
     app.set('db', db);
   });
 
-  const cleanData = () => db.from(table_name).truncate();
+const cleanData = () => db.from(table_name).truncate();
   before('clean the table', cleanData);
   afterEach('clean the table', cleanData);
   after('disconnect from db', () => db.destroy());
 
   // GET requests (READ)
   context(`Given there are items in the '${table_name}' table`, () => {
-    const testEmployees = makeEmployeesArray();
+    const testUsers = makeUsersArray();
 
     beforeEach(() => {
       return db
         .into(table_name)
-        .insert(testEmployees);
+        .insert(testUsers);
     });
 
     it(`GET '${endpoint}' responds with 200 with an array of items`, () => {
       return supertest(app)
         .get(endpoint)
-        .expect(200, testEmployees);
+        .expect(200, testUsers);
     });
 
     it(`GET ${endpoint}/:id responds with 200 with the requested item`, () => {
-      const expected = randomEmployee();
+      const expected = randomUser();
       const { id } = expected;
       return supertest(app)
         .get(endpoint + '/' + id)
