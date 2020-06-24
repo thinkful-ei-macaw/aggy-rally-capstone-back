@@ -7,3 +7,5 @@ VALUES
   ('Jemma Doe', '$2a$10$Spfx9c1ArG4SW1YIYAJRl.BED9K1evwcmV3BDSGs6zNtpxs9aFcf2'),
   ('Jillian Doe', '$2a$10$Spfx9c1ArG4SW1YIYAJRl.BED9K1evwcmV3BDSGs6zNtpxs9aFcf2'),
   ('Jack Doe', '$2a$10$Spfx9c1ArG4SW1YIYAJRl.BED9K1evwcmV3BDSGs6zNtpxs9aFcf2');
+
+  -- remember to put in commented plain text password for test data in the future
