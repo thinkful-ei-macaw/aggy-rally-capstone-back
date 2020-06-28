@@ -1,5 +1,6 @@
 const express = require('express');
 const xss = require('xss');
+const auth = require('../services/auth-service')
 
 /**
  * Router to handle all requests to /users
@@ -10,13 +11,12 @@ usersRouter.use(express.json());
 
 const Service = require('../services/service');
 const usersService = new Service('users');
-const profilesService = new Service('profiles');
 
 /**
  * Removes any possible XSS attack content
  * @param {{}} user the object to remove XSS data from
  */
-const sanitize = user => {
+const sanitizeUser = user => {
   return {
     id: user.id,
     user_name: xss(user.user_name),
@@ -32,7 +32,7 @@ usersRouter.get('/', (req, res, next) => {
     .then(users => {
       return res
         .status(200)
-        .json(users.map(sanitize));
+        .json(users.map(sanitizeUser));
     })
     .catch(next);
 
@@ -49,7 +49,7 @@ usersRouter.get('/:id', (req, res, next) => {
       if (user) {
         return res
           .status(200)
-          .json(sanitize(user));
+          .json(sanitizeUser(user));
           
       } else {
         return res
@@ -67,50 +67,38 @@ usersRouter.post('/', bodyParser, (req, res, next) => {
   const db = req.app.get('db');
 
   const {user_name, password} = req.body;
+  if(!user_name) {
+    return res.status(400).send('username field required');
+  }
+  if(!password) {
+    return res.status(400).send('password field required');
+  }
 
-  const newUser = {user_name, password}
-  usersService.insertItem(db, newUser)
-    .then(user => {
-      return res
-        .status(201)
-        .json(sanitize(user));
-    })
+  auth.bcryptPass(password)
+    .then(password => {
+      const newUser = {user_name, password}
+      usersService.insertItem(db, newUser)
+        .then(user => {
+          return res
+            .status(201)
+            .json(user);
+        })
     .catch(err => next(err));
+    })
 });
+//TODO fix response to user (don't show password)
 
 //profiles
 
-usersRouter.get("/users/:uid/profiles/:pid", (req, res, next) => {
-  const db = req.app.get('db');
 
-  profilesService.getItemById(db)
-    .then(profile => {
-      return res
-        .status(200)
-        .json(profile.map(sanitize));
-    })
-    .catch(err => next(err));
-});
-
-usersRouter.post('/', bodyParser, (req, res, next) => {
-  const db = req.app.get('db');
-
-  const {gamemaster, genre, romance, frequency, duration, alignment, groupsize, pvp, experience, gmexp, playexp} = req.body;
-  
-  const newProfile = {gamemaster, genre, romance, frequency, duration, alignment, groupsize, pvp, experience, gmexp, playexp}
-  profilesService.insertItem(db, newProfile)
-    .then(profile => {
-      return res
-        .status(201)
-        .json(sanitize(profile));
-    })
-    .catch(err => next(err));
-});
 
 //post request for registration
 //post, get, update, delete requests for profiles
 ///users/:uid/profiles/:pid
 //corrisponding service
 //tests...
+//TODO route to confirm identity of user
+
+//
 
 module.exports = usersRouter;
