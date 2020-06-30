@@ -1,55 +1,89 @@
 const express = require('express');
 const xss = require('xss');
+const { requireAuth } = require('../middleware/jwt-auth');
 
 /**
  * Router to handle all requests to /users
  */
-const profilesService = express.Router();
+const profilesRouter = express.Router();
 const bodyParser = express.json();
-profilesService.use(express.json());
+profilesRouter.use(express.json());
 
 const Service = require('../services/service');
 const profilesService = new Service('profiles');
+
 
 /**
  * Removes any possible XSS attack content
  * @param {{}} user the object to remove XSS data from
  */
-// const sanitizeProfile = profile => {
-//     return {
-//       id: user.id,
-//       user_name: xss(user.user_name),
-//       password: xss(user.password)
-//     };
-//   };
+const sanitizeProfile = profile => {
+    return {
+      id: profile.id,
+      gamemaster: profile.gamemaster,
+      genre: profile.genre,
+      romance: profile.romance,
+      frequency: profile.frequency,
+      duration: profile.duration,
+      alignment: profile.alignment,
+      groupsize: profile.groupsize,
+      pvp: profile.pvp,
+      experience: profile.experience,
+      gmexp: profile.gmexp,
+      playexp: profile.playexp
+    };
+  };
 
-profilesService.get("/users/:uid/profiles/:pid", (req, res, next) => {
+profilesRouter.get("/:userid", (req, res, next) => {
     const db = req.app.get('db');
+
+    const userid = req.params.userid
   
-    profilesService.getItemById(db)
+    profilesService.getProfileByUid(db, userid)
       .then(profile => {
         return res
           .status(200)
-          .json(profile.map());
+          .json(sanitizeProfile(profile));
       })
       .catch(err => next(err));
   });
   
-  profilesService.post('/', bodyParser, (req, res, next) => {
+  profilesRouter.post('/', bodyParser, requireAuth, (req, res, next) => {
     const db = req.app.get('db');
   
     const {gamemaster, genre, romance, frequency, duration, alignment, groupsize, pvp, experience, gmexp, playexp} = req.body;
+
+    const userid = req.user.id;
     
-    const newProfile = {gamemaster, genre, romance, frequency, duration, alignment, groupsize, pvp, experience, gmexp, playexp}
+    const newProfile = {userid, gamemaster, genre, romance, frequency, duration, alignment, groupsize, pvp, experience, gmexp, playexp}
+
     profilesService.insertItem(db, newProfile)
       .then(profile => {
         return res
           .status(201)
-          .json(profile);
+          .json(sanitizeProfile(profile));
       })
       .catch(err => next(err));
   });
 
   //if not gm, genre matching, & romance and pvp must match
 
-  
+  profilesRouter.get("/match", (req, res, next) => {
+    const db = req.app.get('db');
+
+    const match = {
+        genre: req.query.genre, 
+        romance: req.query.romance, 
+        pvp: req.query.pvp
+    }
+
+    profilesService.getMatch(db, match)
+      .then(matches => {
+        return res
+          .status(200)
+          .json(matches.map(sanitizeProfile));
+      })
+      .catch(err => next(err));
+  });
+
+  module.exports = profilesRouter;

@@ -18,7 +18,7 @@ app.use(cors());
 const usersRouter = require('./routers/users-router');
 const protectedRouter = require('./routers/protected-router');
 const authRouter = require('./routers/auth-router');
-const profileRouter = require('./routers/profile-router');
+const profilesRouter = require('./routers/profile-router');
 
 // set up routes
 const routes = [
@@ -35,8 +35,8 @@ const routes = [
     router: authRouter,
   },
   {
-    url: '/profile',
-    router: profileRouter,
+    url: '/profiles',
+    router: profilesRouter,
   }
 ];
 

@@ -34,6 +34,28 @@ class Service {
       .first();
   }
 
+  getProfileByUid(db, userid) {
+    console.log(userid)
+    return db
+      .from(this.table)
+      .select()
+      .where({ userid })
+      .first();
+  }
+
+  //
+  getMatches(db, match) {
+    return db
+      .from(this.table)
+      .select()
+      .where({
+        gamemaster: false,
+        genre: match.genre,
+        romance: match.romance,
+        pvp: match.pvp
+       })
+  }
+
   /**
    * inserts a single item into the table
    * @param {{}} db an instance of the Knex database object

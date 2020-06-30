@@ -19,8 +19,7 @@ const usersService = new Service('users');
 const sanitizeUser = user => {
   return {
     id: user.id,
-    user_name: xss(user.user_name),
-    password: xss(user.password)
+    user_name: xss(user.user_name)
   };
 };
 
