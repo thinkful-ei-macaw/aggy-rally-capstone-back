@@ -18,27 +18,32 @@ const profilesService = new Service('profiles');
  * @param {{}} user the object to remove XSS data from
  */
 const sanitizeProfile = profile => {
-    return {
-      id: profile.id,
-      gamemaster: profile.gamemaster,
-      genre: profile.genre,
-      romance: profile.romance,
-      frequency: profile.frequency,
-      duration: profile.duration,
-      alignment: profile.alignment,
-      groupsize: profile.groupsize,
-      pvp: profile.pvp,
-      experience: profile.experience,
-      gmexp: profile.gmexp,
-      playexp: profile.playexp
-    };
-  };
+    if(profile){
+      return {
+        id: profile.id,
+        userid: profile.userid,
+        gamemaster: profile.gamemaster,
+        genre: profile.genre,
+        romance: profile.romance,
+        frequency: profile.frequency,
+        duration: profile.duration,
+        alignment: profile.alignment,
+        groupsize: profile.groupsize,
+        pvp: profile.pvp,
+        experience: profile.experience,
+        gmexp: profile.gmexp,
+        playexp: profile.playexp
+      };
+    }else{
+      return {}
+    }
+};
 
-profilesRouter.get("/:userid", (req, res, next) => {
+  profilesRouter.get("/", requireAuth, (req, res, next) => {
     const db = req.app.get('db');
 
-    const userid = req.params.userid
-  
+    const userid = req.user.id
+    console.log('user id', req.user.id)
     profilesService.getProfileByUid(db, userid)
       .then(profile => {
         return res
@@ -47,7 +52,21 @@ profilesRouter.get("/:userid", (req, res, next) => {
       })
       .catch(err => next(err));
   });
-  
+
+  profilesRouter.get("/:userid", (req, res, next) => {
+      const db = req.app.get('db');
+
+      const userid = req.params.userid
+    
+      profilesService.getProfileByUid(db, userid)
+        .then(profile => {
+          return res
+            .status(200)
+            .json(sanitizeProfile(profile));
+        })
+        .catch(err => next(err));
+    });
+    
   profilesRouter.post('/', bodyParser, requireAuth, (req, res, next) => {
     const db = req.app.get('db');
   

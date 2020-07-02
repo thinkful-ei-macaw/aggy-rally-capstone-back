@@ -35,7 +35,6 @@ class Service {
   }
 
   getProfileByUid(db, userid) {
-    console.log(userid)
     return db
       .from(this.table)
       .select()
