@@ -44,6 +44,7 @@ class Service {
 
   //
   getMatches(db, match) {
+    console.log(match)
     return db
       .from(this.table)
       .select()

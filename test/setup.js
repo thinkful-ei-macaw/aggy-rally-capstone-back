@@ -1,6 +1,6 @@
 process.env.TZ = 'UTC';
 
-require('dotenv').config();
+require('dotenv').config({silent: true});
 const { expect } = require('chai');
 const supertest = require('supertest');
 

@@ -53,6 +53,24 @@ const sanitizeProfile = profile => {
       .catch(err => next(err));
   });
 
+  profilesRouter.get("/match", (req, res, next) => {
+    const db = req.app.get('db');
+
+    const match = {
+        genre: req.query.genre, 
+        romance: req.query.romance, 
+        pvp: req.query.pvp
+    }
+
+    profilesService.getMatches(db, match)
+      .then(matches => {
+        return res
+          .status(200)
+          .json(matches.map(sanitizeProfile));
+      })
+      .catch(err => next(err));
+  });
+
   profilesRouter.get("/:userid", (req, res, next) => {
       const db = req.app.get('db');
 
@@ -87,22 +105,6 @@ const sanitizeProfile = profile => {
 
   //if not gm, genre matching, & romance and pvp must match
 
-  profilesRouter.get("/match", (req, res, next) => {
-    const db = req.app.get('db');
-
-    const match = {
-        genre: req.query.genre, 
-        romance: req.query.romance, 
-        pvp: req.query.pvp
-    }
-
-    profilesService.getMatch(db, match)
-      .then(matches => {
-        return res
-          .status(200)
-          .json(matches.map(sanitizeProfile));
-      })
-      .catch(err => next(err));
-  });
+  
 
   module.exports = profilesRouter;
