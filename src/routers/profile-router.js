@@ -103,6 +103,20 @@ const sanitizeProfile = profile => {
       .catch(err => next(err));
   });
 
+  profilesRouter.delete('/profile/:id', requireAuth, (res, req, next) => {
+    const db = req.app.get('db');
+
+    const id = req.params.id;
+
+    profilesService.deleteItem(db, id)
+      .then(profile => {
+        return res 
+          .status(204)
+          .json();
+      })
+      .catch(err => next(err));
+  })
+
   //if not gm, genre matching, & romance and pvp must match
 
   
