@@ -16,7 +16,6 @@ app.use(cors());
 
 // import routers
 const usersRouter = require('./routers/users-router');
-const protectedRouter = require('./routers/protected-router');
 const authRouter = require('./routers/auth-router');
 const profilesRouter = require('./routers/profile-router');
 
@@ -25,10 +24,6 @@ const routes = [
   {
     url: '/users',
     router: usersRouter,
-  },
-  {
-    url: '/protected',
-    router: protectedRouter,
   },
   {
     url: '/auth',

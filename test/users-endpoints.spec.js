@@ -2,7 +2,8 @@ const knex = require('knex');
 const app = require('../src/app');
 
 const { TEST_DATABASE_URL } = require('../src/config');
-const { makeUsersArray, randomUser } = require('./users.fixtures');
+const { makeUsersArray, randomUser, makeUsersRes } = require('./users.fixtures');
+const usersRouter = require('../src/routers/users-router');
 
 // set up variables used throughout these tests
 const table_name = 'users';
@@ -19,7 +20,7 @@ describe('Users endpoints', () => {
     app.set('db', db);
   });
 
-const cleanData = () => db.from(table_name).truncate();
+const cleanData = () => db.raw('truncate users restart identity cascade');
   before('clean the table', cleanData);
   afterEach('clean the table', cleanData);
   after('disconnect from db', () => db.destroy());
@@ -27,6 +28,7 @@ const cleanData = () => db.from(table_name).truncate();
   // GET requests (READ)
   context(`Given there are items in the '${table_name}' table`, () => {
     const testUsers = makeUsersArray();
+    const testUsersRes = makeUsersRes();
 
     beforeEach(() => {
       return db
@@ -37,7 +39,7 @@ const cleanData = () => db.from(table_name).truncate();
     it(`GET '${endpoint}' responds with 200 with an array of items`, () => {
       return supertest(app)
         .get(endpoint)
-        .expect(200, testUsers);
+        .expect(200, testUsersRes);
     });
 
     it(`GET ${endpoint}/:id responds with 200 with the requested item`, () => {

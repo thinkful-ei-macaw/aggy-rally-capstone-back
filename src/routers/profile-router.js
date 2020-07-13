@@ -78,6 +78,9 @@ const sanitizeProfile = profile => {
     
       profilesService.getProfileByUid(db, userid)
         .then(profile => {
+          if(!profile){
+            return res.status(404).send('profile not found')
+          }
           return res
             .status(200)
             .json(sanitizeProfile(profile));
@@ -103,13 +106,13 @@ const sanitizeProfile = profile => {
       .catch(err => next(err));
   });
 
-  profilesRouter.delete('/profile/:id', requireAuth, (res, req, next) => {
+  profilesRouter.delete('/:id', requireAuth, (req, res, next) => {
     const db = req.app.get('db');
 
     const id = req.params.id;
 
     profilesService.deleteItem(db, id)
-      .then(profile => {
+      .then(() => {
         return res 
           .status(204)
           .json();
