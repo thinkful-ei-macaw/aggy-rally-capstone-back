@@ -53,7 +53,7 @@ const sanitizeProfile = profile => {
       .catch(err => next(err));
   });
 
-  profilesRouter.get("/match", (req, res, next) => {
+  profilesRouter.get("/match", requireAuth, (req, res, next) => {
     const db = req.app.get('db');
 
     const match = {
@@ -106,7 +106,7 @@ const sanitizeProfile = profile => {
       .catch(err => next(err));
   });
 
-  profilesRouter.delete('/:id', requireAuth, (req, res, next) => {
+  profilesRouter.delete('/:id', bodyParser, requireAuth, (req, res, next) => {
     const db = req.app.get('db');
 
     const id = req.params.id;
@@ -115,7 +115,7 @@ const sanitizeProfile = profile => {
       .then(() => {
         return res 
           .status(204)
-          .json();
+          .end();
       })
       .catch(err => next(err));
   })

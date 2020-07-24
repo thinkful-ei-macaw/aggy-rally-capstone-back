@@ -50,7 +50,6 @@ function makeProfileArray() {
 
   function makeProfileRes() {
     const testProfileRes = makeProfileArray()
-    // testProfileRes.forEach(profile => delete profile.id)
     return testProfileRes
   }
   

@@ -25,6 +25,48 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
   afterEach('clean the table', cleanData);
   after('disconnect from db', () => db.destroy());
 
+  describe('POST /', () => {
+    const testUsers = makeUsersArray();
+    beforeEach('insert users', () => (db, testUsers));
+    const required = ['user_name', 'password'];
+
+    required.forEach((field) => {
+        const logAttempt = {
+
+            user_name: testUsers.user_name,
+            password: testUsers.password,
+        };
+        it(`Responds with 400 required error when '${field}' is missing`, () => {
+
+            return supertest(app)
+                .post('/')
+                .send(logAttempt)
+                .expect(404);
+        });
+    });
+    it(`Responds 200 and JWT auth Token and user ID when valid`, done => {
+        done();
+        const userValid = {
+            user_name: testUsers.user_name,
+            password: testUsers.password,
+        };
+        const expectedToken = jwt.sign(
+            { id: testUsers.id },
+            process.env.JWT_SECRET,
+            {
+                subject: testUsers.user_name,
+                algorithm: 'HS256',
+            }
+        );
+        const expectedID = testUsers.id;
+
+        return supertest(app).post('/').send(userValid).expect(200, {
+            authToken: expectedToken,
+            id: expectedID,
+        });
+    });
+});
+
   // GET requests (READ)
   context(`Given there are items in the '${table_name}' table`, () => {
     const testUsers = makeUsersArray();
@@ -49,7 +91,6 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
         .get(endpoint + '/' + id)
         .expect(200, expected);
     });
-
   });
 
   context(`Given no items in the '${table_name}' table`, () => {
@@ -66,5 +107,4 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
         .expect(404);
     });
   });
-  
 });
