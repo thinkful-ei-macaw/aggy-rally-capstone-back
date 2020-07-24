@@ -99,6 +99,9 @@ const sanitizeProfile = profile => {
 
     profilesService.insertItem(db, newProfile)
       .then(profile => {
+        if(!profile){
+          return res.status(400).send('Invalid input')
+        }
         return res
           .status(201)
           .json(sanitizeProfile(profile));
@@ -112,7 +115,12 @@ const sanitizeProfile = profile => {
     const id = req.params.id;
 
     profilesService.deleteItem(db, id)
-      .then(() => {
+      .then(id => {
+        if(!id){
+          return res 
+            .status(404)
+            .send('Profile to be deleted does not exist')
+        }
         return res 
           .status(204)
           .end();

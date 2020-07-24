@@ -31,16 +31,11 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
     const required = ['user_name', 'password'];
 
     required.forEach((field) => {
-        const logAttempt = {
-
-            user_name: testUsers.user_name,
-            password: testUsers.password,
-        };
-        it(`Responds with 400 required error when '${field}' is missing`, () => {
+        it(`Responds with 404 required error when '${field}' is missing`, () => {
 
             return supertest(app)
                 .post('/')
-                .send(logAttempt)
+                .send()
                 .expect(404);
         });
     });
@@ -60,10 +55,13 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
         );
         const expectedID = testUsers.id;
 
-        return supertest(app).post('/').send(userValid).expect(200, {
+        return supertest(app)
+          .post('/')
+          .send(userValid)
+          .expect(200, {
             authToken: expectedToken,
             id: expectedID,
-        });
+          });
     });
 });
 

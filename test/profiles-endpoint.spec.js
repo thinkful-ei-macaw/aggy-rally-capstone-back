@@ -28,18 +28,57 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
   afterEach('clean the table', cleanData);
   after('disconnect from db', () => db.destroy());
 
-  // describe('POST /', () => {
-  //   const testProfile = makeProfileArray();
-  //   const testProfileRes = makeProfileRes();
-  //   const testUsers = makeUsersArray();
-  //   const authToken = auth.createJwt(testUsers[0].user_name, {user_id: testUsers[0].id});
-  // })
+  describe(`POST ${endpoint}/`, () => {
+    const required = ['gamemaster', 'genre', 'romance', 'frequency', 'duration', 'alignment', 'groupsize', 'pvp', 'experience', 'gmexp', 'playexp']
+
+    const testUsers = makeUsersArray();
+    const authToken = auth.createJwt(testUsers[0].user_name, {userid: testUsers[0].id});
+    const newProfile = {
+      userid: 1, 
+      gamemaster: false, 
+      genre: 'sci-fi', 
+      romance: true, 
+      frequency: 'Weekly', 
+      duration: 'Short 2 to 3 Hours', 
+      alignment: 'Evil', 
+      groupsize: 4, 
+      pvp: true, 
+      experience: 1, 
+      gmexp: false, 
+      playexp: true
+    }
+    
+    beforeEach(() => {
+      return db
+        .into('users')
+        .insert(testUsers)
+    });
+
+    required.forEach((field) => {
+      it(`Responds with 404 required error when '${field}' is missing`, () => {
+          return supertest(app)
+              .post('/')
+              .send()
+              .expect(404);
+      });
+  });
+
+    it(`Creates and sesponds with 201 when '${table_name}' is provided`, () => {
+      
+      
+      return supertest(app)
+        .post(endpoint + '/')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(newProfile)
+        .expect(201);
+    });
+  });
 
   context(`Given there are items in the '${table_name}' table`, () => {
     const testProfile = makeProfileArray();
     const testProfileRes = makeProfileRes();
     const testUsers = makeUsersArray();
-    const authToken = auth.createJwt(testUsers[0].user_name, {user_id: testUsers[0].id});
+    const authToken = auth.createJwt(testUsers[0].user_name, {userid: testUsers[0].id});
 
     beforeEach(() => {
       return db
@@ -55,7 +94,6 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
 
     it(`DELETE ${endpoint}/:id responds with 204`, () => {
       const id = 2
-      //const expected = testProfile.filter(profile => profile.id !== id);
       const expected = testProfile[0]
       return supertest(app)
         .delete(endpoint + '/' + id)
@@ -66,7 +104,15 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
             .get(endpoint)
             .set('Authorization', `Bearer ${authToken}`)
             .expect(expected)
-        })// consult with chris tomorrow
+        });
+    });
+
+    it(`DELETE ${endpoint}/:id responds with 404`, () => {
+      const id = 12
+      return supertest(app)
+        .delete(endpoint + '/' + id)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404)
     });
   });
 
@@ -75,7 +121,7 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
     const testProfile = makeProfileArray();
     const testProfileRes = makeProfileRes();
     const testUsers = makeUsersArray();
-    const authToken = auth.createJwt(testUsers[0].user_name, {user_id: testUsers[0].id});
+    const authToken = auth.createJwt(testUsers[0].user_name, {userid: testUsers[0].id});
 
     beforeEach(() => {
       return db
@@ -109,21 +155,21 @@ const cleanData = () => db.raw('truncate users restart identity cascade');
       return supertest(app)
         .get(endpoint + '/match?genre=fantasy&romance=true&pvp=true')
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(200, [testProfile[2]]);
-    }); //issues with this involving no query
+        .expect(200, [testProfile[0], testProfile[2]]);
+    }); 
 
     
   });
 
   context(`Given no items in the '${table_name}' table`, () => {
     const testUsers = makeUsersArray();
-    const authToken = auth.createJwt(testUsers[0].user_name, {user_id: testUsers[0].id});
+    const authToken = auth.createJwt(testUsers[0].user_name, {userid: testUsers[0].id});
 
     beforeEach(() => {
       return db
         .into('users')
         .insert(testUsers)
-    })
+    });
 
     it(`GET ${endpoint} responds with 200 with an empty object`, () => {
       return supertest(app)
